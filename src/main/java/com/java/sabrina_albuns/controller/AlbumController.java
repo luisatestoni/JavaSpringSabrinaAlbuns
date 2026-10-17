@@ -1,0 +1,38 @@
+package com.java.sabrina_albuns.controller;
+
+import com.java.sabrina_albuns.business.AlbumService;
+import com.java.sabrina_albuns.infrastructure.entitys.Album;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/album")
+@RequiredArgsConstructor
+public class AlbumController {
+
+    private final AlbumService albumService;
+
+    @PostMapping
+    public ResponseEntity<Void> salvarAlbum(@RequestBody Album album) {
+        albumService.salvarAlbum(album);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<Album> buscarAlbumPorNome(@RequestParam String nome) {
+        return ResponseEntity.ok(albumService.buscarAlbumPorNomeAlbum(nome));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Void> deletarAlbumPorNome(@RequestParam String nome) {
+        albumService.deletarAlbumPorNome(nome);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping
+    public ResponseEntity<Void> atualizarAlbumPorId(@RequestBody Album album, @RequestParam Integer id) {
+        albumService.atualizarAlbumPorId(id, album);
+        return ResponseEntity.ok().build();
+    }
+}
