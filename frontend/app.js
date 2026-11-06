@@ -5,6 +5,7 @@
 
 const API_BASE_URL = 'http://localhost:8080/album';
 let todosOsAlbunsCache = [];
+let ultimoAlbumBuscado = null;
 
 // Executa ao carregar a página
 document.addEventListener('DOMContentLoaded', () => {
@@ -130,16 +131,35 @@ function criarCardAlbum(album) {
         </div>
 
         <div class="card-actions">
-            <button class="btn btn-outline btn-sm" onclick='prepararEdicao(${JSON.stringify(album)})'>
+            <button class="btn btn-outline btn-sm" onclick="prepararEdicaoPorId(${album.id})">
                 ✏️ Editar (PUT)
             </button>
-            <button class="btn btn-danger btn-sm" onclick="confirmarExclusao('${escapeHtml(album.nomeAlbum)}')">
+            <button class="btn btn-danger btn-sm" onclick="confirmarExclusaoPorId(${album.id})">
                 🗑️ Excluir (DELETE)
             </button>
         </div>
     `;
 
     return card;
+}
+
+/**
+ * Funções auxiliares para buscar álbum do cache por ID
+ */
+function prepararEdicaoPorId(id) {
+    const album = todosOsAlbunsCache.find(a => a.id === id);
+    if (album) {
+        prepararEdicao(album);
+    } else {
+        mostrarToast('Álbum não encontrado no cache local.', 'error');
+    }
+}
+
+function confirmarExclusaoPorId(id) {
+    const album = todosOsAlbunsCache.find(a => a.id === id);
+    if (album) {
+        confirmarExclusao(album.nomeAlbum);
+    }
 }
 
 /**
@@ -165,6 +185,7 @@ async function buscarAlbumPorNome() {
         }
 
         const album = await response.json();
+        ultimoAlbumBuscado = album;
         exibirResultadoBusca(album);
         filtrarCardsNaTela(nome);
         mostrarToast(`[GET 200 OK] Álbum "${album.nomeAlbum}" encontrado!`, 'success');
@@ -198,10 +219,10 @@ function exibirResultadoBusca(album) {
                 </p>
             </div>
             <div style="display: flex; gap: 10px;">
-                <button class="btn btn-outline btn-sm" onclick='prepararEdicao(${JSON.stringify(album)})'>
+                <button class="btn btn-outline btn-sm" onclick="prepararEdicaoUltimoBuscado()">
                     ✏️ Editar (PUT)
                 </button>
-                <button class="btn btn-danger btn-sm" onclick="confirmarExclusao('${escapeHtml(album.nomeAlbum)}')">
+                <button class="btn btn-danger btn-sm" onclick="confirmarExclusaoUltimoBuscado()">
                     🗑️ Excluir (DELETE)
                 </button>
             </div>
@@ -210,6 +231,18 @@ function exibirResultadoBusca(album) {
 
     container.classList.remove('hidden');
     container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function prepararEdicaoUltimoBuscado() {
+    if (ultimoAlbumBuscado) {
+        prepararEdicao(ultimoAlbumBuscado);
+    }
+}
+
+function confirmarExclusaoUltimoBuscado() {
+    if (ultimoAlbumBuscado) {
+        confirmarExclusao(ultimoAlbumBuscado.nomeAlbum);
+    }
 }
 
 function fecharResultadoBusca() {
@@ -235,6 +268,7 @@ async function salvarOuAtualizarAlbum(event) {
     }
 
     const payload = {
+        id: id ? parseInt(id) : null,
         nomeAlbum: nomeAlbum,
         anoLancamento: anoLancamento ? parseInt(anoLancamento) : null,
         numeroFaixas: numeroFaixas ? parseInt(numeroFaixas) : null,

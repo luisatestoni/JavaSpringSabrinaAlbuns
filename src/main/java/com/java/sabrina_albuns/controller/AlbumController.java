@@ -39,8 +39,12 @@ public class AlbumController {
     }
 
     @PutMapping
-    public ResponseEntity<Void> atualizarAlbumPorId(@RequestBody Album album, @RequestParam Integer id) {
-        albumService.atualizarAlbumPorId(id, album);
+    public ResponseEntity<Void> atualizarAlbumPorId(@RequestBody Album album, @RequestParam(required = false) Integer id) {
+        Integer targetId = (id != null) ? id : album.getId();
+        if (targetId == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        albumService.atualizarAlbumPorId(targetId, album);
         return ResponseEntity.ok().build();
     }
 }
