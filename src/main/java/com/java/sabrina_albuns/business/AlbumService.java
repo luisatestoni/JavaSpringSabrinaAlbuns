@@ -4,6 +4,8 @@ import com.java.sabrina_albuns.infrastructure.entitys.Album;
 import com.java.sabrina_albuns.infrastructure.repository.AlbumRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class AlbumService {
 
@@ -11,6 +13,10 @@ public class AlbumService {
 
     public AlbumService(AlbumRepository repository) {
         this.repository = repository;
+    }
+
+    public List<Album> listarTodos() {
+        return repository.findAll();
     }
 
     public void salvarAlbum(Album album) {

@@ -6,12 +6,20 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/album")
 @RequiredArgsConstructor
 public class AlbumController {
 
     private final AlbumService albumService;
+
+    @GetMapping("/todos")
+    public ResponseEntity<List<Album>> listarTodos() {
+        return ResponseEntity.ok(albumService.listarTodos());
+    }
 
     @PostMapping
     public ResponseEntity<Void> salvarAlbum(@RequestBody Album album) {

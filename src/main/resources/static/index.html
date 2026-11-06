@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sabrina Carpenter • Discografia & Gestão de Álbuns</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Topo / Header da Aplicação -->
+    <header class="hero-header">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <span class="badge-artist">DISCOGRAFIA OFICIAL</span>
+            <h1 class="hero-title">Sabrina Carpenter</h1>
+            <p class="hero-subtitle">Interface de Gerenciamento de Álbuns integrada com Backend Java Spring Boot & PostgreSQL</p>
+            
+            <div class="status-bar">
+                <div class="status-item">
+                    <span class="status-dot"></span>
+                    <span id="backendStatus">Backend: Conectado (Porta 8080)</span>
+                </div>
+                <div class="status-item">
+                    <span>Total de Álbuns: <strong id="totalAlbunsCount">0</strong></span>
+                </div>
+                <button class="btn-info" onclick="abrirModalExplicacao()" title="Ver resumo técnico da integração">
+                    ℹ️ Explicar Integração HTTP
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <!-- Barra de Ações: Busca (GET por nome) e Novo Cadastro -->
+        <section class="actions-section">
+            <div class="search-box">
+                <input type="text" id="inputBusca" placeholder="Pesquisar álbum por nome (ex: Short 'n Sweet)..." onkeypress="tratarEnterBusca(event)">
+                <button class="btn btn-secondary" onclick="buscarAlbumPorNome()">
+                    <span class="btn-icon">🔍</span> Buscar (GET)
+                </button>
+                <button class="btn btn-outline" onclick="listarTodosOsAlbuns()" title="Recarregar todos os álbuns">
+                    🔄 Todos (GET)
+                </button>
+            </div>
+            
+            <button class="btn btn-primary" onclick="abrirModalFormulario()">
+                <span class="btn-icon">✨</span> Novo Álbum (POST)
+            </button>
+        </section>
+
+        <!-- Card de Destaque da Busca (se houver resultado específico) -->
+        <section id="buscaResultadoContainer" class="search-result-container hidden">
+            <div class="search-result-card">
+                <div class="search-result-header">
+                    <h3>🎯 Álbum Encontrado via <code>GET /album?nome=...</code></h3>
+                    <button class="btn-close" onclick="fecharResultadoBusca()">&times;</button>
+                </div>
+                <div id="buscaResultadoConteudo" class="search-result-body"></div>
+            </div>
+        </section>
+
+        <!-- Lista de Álbuns Cadastrados -->
+        <section class="albums-section">
+            <div class="section-header">
+                <h2>Álbuns Cadastrados</h2>
+                <p>Consumindo endpoints RESTful com persistência no banco PostgreSQL</p>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="loadingIndicator" class="loading-state">
+                <div class="spinner"></div>
+                <p>Carregando álbuns do backend...</p>
+            </div>
+
+            <!-- Grade de Álbuns -->
+            <div id="albumsGrid" class="albums-grid"></div>
+
+            <!-- Mensagem de Lista Vazia -->
+            <div id="emptyState" class="empty-state hidden">
+                <p>Nenhum álbum encontrado no banco de dados.</p>
+                <button class="btn btn-primary" onclick="abrirModalFormulario()">Cadastrar o Primeiro Álbum</button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal de Cadastro / Edição (POST / PUT) -->
+    <div id="modalFormulario" class="modal-backdrop hidden">
+        <div class="modal-window">
+            <div class="modal-header">
+                <h3 id="modalTitulo">Cadastrar Novo Álbum</h3>
+                <button class="btn-close" onclick="fecharModalFormulario()">&times;</button>
+            </div>
+            
+            <form id="albumForm" onsubmit="salvarOuAtualizarAlbum(event)">
+                <input type="hidden" id="albumId">
+
+                <div class="form-group">
+                    <label for="nomeAlbum">Nome do Álbum *</label>
+                    <input type="text" id="nomeAlbum" required placeholder="Ex: Short 'n Sweet">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="anoLancamento">Ano de Lançamento</label>
+                        <input type="number" id="anoLancamento" min="2000" max="2099" placeholder="Ex: 2024">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="numeroFaixas">Número de Faixas</label>
+                        <input type="number" id="numeroFaixas" min="1" max="100" placeholder="Ex: 12">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="genero">Gênero Musical</label>
+                        <input type="text" id="genero" placeholder="Ex: Pop, Dance-pop">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gravadora">Gravadora</label>
+                        <input type="text" id="gravadora" placeholder="Ex: Island Records">
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="fecharModalFormulario()">Cancelar</button>
+                    <button type="submit" id="btnSubmitForm" class="btn btn-primary">
+                        Salvar Álbum (POST)
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Didático para Apresentação Individual ao Professor -->
+    <div id="modalExplicacao" class="modal-backdrop hidden">
+        <div class="modal-window modal-lg">
+            <div class="modal-header">
+                <h3>📖 Como Funciona a Integração Frontend ↔ Backend</h3>
+                <button class="btn-close" onclick="fecharModalExplicacao()">&times;</button>
+            </div>
+            <div class="modal-body explicacao-content">
+                <h4>1. Como o frontend realiza uma requisição HTTP?</h4>
+                <p>O JavaScript utiliza a API nativa <code>fetch()</code> com funções assíncronas (<code>async/await</code>). A requisição é disparada pela porta <strong>8080</strong> para o backend Spring Boot em <code>http://localhost:8080/album</code>.</p>
+
+                <h4>2. Verbos HTTP implementados e utilizados:</h4>
+                <ul>
+                    <li><strong class="tag-post">POST</strong> <code>/album</code>: Envia os dados do formulário serializados em <strong>JSON</strong> no corpo (<em>Body</em>) da requisição para cadastrar um novo álbum.</li>
+                    <li><strong class="tag-get">GET</strong> <code>/album?nome=...</code>: Envia o nome do álbum por parâmetro de URL (<em>Query Param</em>) para buscar um registro específico.</li>
+                    <li><strong class="tag-get">GET</strong> <code>/album/todos</code>: Recupera a lista completa de todos os álbuns cadastrados no PostgreSQL.</li>
+                    <li><strong class="tag-put">PUT</strong> <code>/album?id=...</code>: Envia os dados atualizados no corpo (<em>Body</em>) e o ID na URL para modificar um álbum existente.</li>
+                    <li><strong class="tag-delete">DELETE</strong> <code>/album?nome=...</code>: Envia o nome por parâmetro para remover o registro do banco de dados.</li>
+                </ul>
+
+                <h4>3. Como o backend processa e responde?</h4>
+                <p>O <code>AlbumController</code> recebe a requisição, delega as regras para o <code>AlbumService</code>, que utiliza o <code>AlbumRepository</code> (Spring Data JPA / Hibernate) para persistir ou consultar a tabela <code>album</code> no PostgreSQL. Ao concluir, o Spring responde com status HTTP correspondente (<code>200 OK</code>) e dados em JSON quando aplicável.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="fecharModalExplicacao()">Entendi, fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Container de Toasts / Mensagens Flutuantes -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
