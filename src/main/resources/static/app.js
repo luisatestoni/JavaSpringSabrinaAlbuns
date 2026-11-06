@@ -4,10 +4,19 @@
  */
 
 const API_BASE_URL = 'http://localhost:8080/album';
+let todosOsAlbunsCache = [];
 
 // Executa ao carregar a página
 document.addEventListener('DOMContentLoaded', () => {
     listarTodosOsAlbuns();
+
+    // Filtro em tempo real (insensível a maiúsculas/minúsculas)
+    const inputBusca = document.getElementById('inputBusca');
+    if (inputBusca) {
+        inputBusca.addEventListener('input', (e) => {
+            filtrarCardsNaTela(e.target.value);
+        });
+    }
 });
 
 /**
@@ -35,24 +44,16 @@ async function listarTodosOsAlbuns() {
             throw new Error(`Erro ${response.status}: Falha ao buscar lista de álbuns.`);
         }
 
-        const albuns = await response.json();
+        todosOsAlbunsCache = await response.json();
         loading.classList.add('hidden');
 
         // Atualiza status de conexão
         statusDot.style.backgroundColor = '#4caf50';
         statusDot.style.boxShadow = '0 0 8px #4caf50';
         statusText.textContent = 'Backend: Conectado (Porta 8080)';
-        countBadge.textContent = albuns.length;
+        countBadge.textContent = todosOsAlbunsCache.length;
 
-        if (!albuns || albuns.length === 0) {
-            emptyState.classList.remove('hidden');
-            return;
-        }
-
-        albuns.forEach(album => {
-            const card = criarCardAlbum(album);
-            grid.appendChild(card);
-        });
+        renderizarCards(todosOsAlbunsCache);
 
     } catch (error) {
         console.error('Erro na requisição GET:', error);
@@ -62,6 +63,45 @@ async function listarTodosOsAlbuns() {
         statusText.textContent = 'Backend: Desconectado ou com erro';
         mostrarToast('Não foi possível conectar ao backend Spring Boot (porta 8080). Certifique-se de que a aplicação está rodando.', 'error');
     }
+}
+
+/**
+ * Renderiza uma lista de álbuns na grade
+ */
+function renderizarCards(albuns) {
+    const grid = document.getElementById('albumsGrid');
+    const emptyState = document.getElementById('emptyState');
+    grid.innerHTML = '';
+
+    if (!albuns || albuns.length === 0) {
+        emptyState.classList.remove('hidden');
+        return;
+    }
+
+    emptyState.classList.add('hidden');
+    albuns.forEach(album => {
+        const card = criarCardAlbum(album);
+        grid.appendChild(card);
+    });
+}
+
+/**
+ * Filtro em tempo real no cliente (sem case sensitivity)
+ */
+function filtrarCardsNaTela(termo) {
+    if (!termo || !termo.trim()) {
+        renderizarCards(todosOsAlbunsCache);
+        return;
+    }
+
+    const termoFormatado = termo.trim().toLowerCase();
+    const filtrados = todosOsAlbunsCache.filter(album => 
+        (album.nomeAlbum && album.nomeAlbum.toLowerCase().includes(termoFormatado)) ||
+        (album.genero && album.genero.toLowerCase().includes(termoFormatado)) ||
+        (album.gravadora && album.gravadora.toLowerCase().includes(termoFormatado))
+    );
+
+    renderizarCards(filtrados);
 }
 
 /**
@@ -126,6 +166,7 @@ async function buscarAlbumPorNome() {
 
         const album = await response.json();
         exibirResultadoBusca(album);
+        filtrarCardsNaTela(nome);
         mostrarToast(`[GET 200 OK] Álbum "${album.nomeAlbum}" encontrado!`, 'success');
 
     } catch (error) {

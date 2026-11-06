@@ -24,13 +24,27 @@ public class AlbumService {
     }
 
     public Album buscarAlbumPorNomeAlbum(String nomeAlbum) {
-        return repository.findByNomeAlbum(nomeAlbum).orElseThrow(
-                () -> new RuntimeException("Nome do álbum não encontrado")
-        );
+        if (nomeAlbum == null || nomeAlbum.trim().isEmpty()) {
+            throw new RuntimeException("Nome do álbum não informado");
+        }
+
+        // 1. Tenta correspondência exata sem diferenciar maiúsculas/minúsculas
+        var exato = repository.findByNomeAlbumIgnoreCase(nomeAlbum.trim());
+        if (exato.isPresent()) {
+            return exato.get();
+        }
+
+        // 2. Tenta correspondência parcial (ex: "emails" acha "Emails I Can't Send")
+        var parciais = repository.findByNomeAlbumContainingIgnoreCase(nomeAlbum.trim());
+        if (!parciais.isEmpty()) {
+            return parciais.get(0);
+        }
+
+        throw new RuntimeException("Nome do álbum não encontrado");
     }
 
     public void deletarAlbumPorNome(String nomeAlbum) {
-        repository.deleteByNomeAlbum(nomeAlbum);
+        repository.deleteByNomeAlbumIgnoreCase(nomeAlbum.trim());
     }
 
     public void atualizarAlbumPorId(Integer id, Album album) {
