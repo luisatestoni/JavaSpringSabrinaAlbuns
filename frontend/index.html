@@ -27,9 +27,6 @@
                 <div class="status-item">
                     <span>Total de Álbuns: <strong id="totalAlbunsCount">0</strong></span>
                 </div>
-                <button class="btn-info" onclick="abrirModalExplicacao()" title="Ver resumo técnico da integração">
-                    ℹ️ Explicar Integração HTTP
-                </button>
             </div>
         </div>
     </header>
@@ -136,35 +133,6 @@
                     </button>
                 </div>
             </form>
-        </div>
-    </div>
-
-    <!-- Modal Didático para Apresentação Individual ao Professor -->
-    <div id="modalExplicacao" class="modal-backdrop hidden">
-        <div class="modal-window modal-lg">
-            <div class="modal-header">
-                <h3>📖 Como Funciona a Integração Frontend ↔ Backend</h3>
-                <button class="btn-close" onclick="fecharModalExplicacao()">&times;</button>
-            </div>
-            <div class="modal-body explicacao-content">
-                <h4>1. Como o frontend realiza uma requisição HTTP?</h4>
-                <p>O JavaScript utiliza a API nativa <code>fetch()</code> com funções assíncronas (<code>async/await</code>). A requisição é disparada pela porta <strong>8080</strong> para o backend Spring Boot em <code>http://localhost:8080/album</code>.</p>
-
-                <h4>2. Verbos HTTP implementados e utilizados:</h4>
-                <ul>
-                    <li><strong class="tag-post">POST</strong> <code>/album</code>: Envia os dados do formulário serializados em <strong>JSON</strong> no corpo (<em>Body</em>) da requisição para cadastrar um novo álbum.</li>
-                    <li><strong class="tag-get">GET</strong> <code>/album?nome=...</code>: Envia o nome do álbum por parâmetro de URL (<em>Query Param</em>) para buscar um registro específico.</li>
-                    <li><strong class="tag-get">GET</strong> <code>/album/todos</code>: Recupera a lista completa de todos os álbuns cadastrados no PostgreSQL.</li>
-                    <li><strong class="tag-put">PUT</strong> <code>/album?id=...</code>: Envia os dados atualizados no corpo (<em>Body</em>) e o ID na URL para modificar um álbum existente.</li>
-                    <li><strong class="tag-delete">DELETE</strong> <code>/album?nome=...</code>: Envia o nome por parâmetro para remover o registro do banco de dados.</li>
-                </ul>
-
-                <h4>3. Como o backend processa e responde?</h4>
-                <p>O <code>AlbumController</code> recebe a requisição, delega as regras para o <code>AlbumService</code>, que utiliza o <code>AlbumRepository</code> (Spring Data JPA / Hibernate) para persistir ou consultar a tabela <code>album</code> no PostgreSQL. Ao concluir, o Spring responde com status HTTP correspondente (<code>200 OK</code>) e dados em JSON quando aplicável.</p>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" onclick="fecharModalExplicacao()">Entendi, fechar</button>
-            </div>
         </div>
     </div>
 

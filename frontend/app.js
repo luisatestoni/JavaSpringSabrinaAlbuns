@@ -367,14 +367,6 @@ function prepararEdicao(album) {
     document.getElementById('modalFormulario').classList.remove('hidden');
 }
 
-function abrirModalExplicacao() {
-    document.getElementById('modalExplicacao').classList.remove('hidden');
-}
-
-function fecharModalExplicacao() {
-    document.getElementById('modalExplicacao').classList.add('hidden');
-}
-
 /**
  * Sistema de Toasts (Notificações Flutuantes)
  */
